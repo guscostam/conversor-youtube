@@ -33,5 +33,5 @@ while True:
     while option not in 'SN':
         option = input(str('Quer Continuar? [S/N]: ')).upper()
 
-    if option in 'NS':
+    if option in 'N':
         break
