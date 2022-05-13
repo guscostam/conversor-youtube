@@ -17,21 +17,23 @@ while True:
         type_download = int(input('Escolha uma das Opções: '))
 
     if type_download == 1:
+        print('CARREGANDO...')
         stream = video.streams.get_highest_resolution()
 
         stream.download(output_path=desktop)
         print('Download Concluido com Sucesso!')
 
     if type_download == 2:
+        print('CARREGANDO...')
         stream = video.streams.get_audio_only()
-
-        stream.download(output_path=desktop, filename='audio.mp3')
+        video_name = video.title + '.mp3'
+        stream.download(output_path=desktop, filename=video_name)
         print('Download Concluido com Sucesso!')
 
     option = ' '
 
     while option not in 'SN':
-        option = input(str('Quer Continuar? [S/N]: ')).upper()
+        option = str(input('Quer Continuar? [S/N]: ')).upper()
 
     if option in 'N':
         break
