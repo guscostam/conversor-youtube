@@ -1,39 +1,38 @@
 from pytube import YouTube
+from PySimpleGUI import PySimpleGUI as sg
 from os import path
 
 desktop = path.expanduser('~/Desktop')
 
+sg.theme('LightGrey1')
+
+layout = [
+    [sg.Text('URL Vídeo Youtube'), sg.Input(key='url')],
+    [sg.Radio('MP3', "RADIO1", default=True, key='mp3'), sg.Radio('MP4', "RADIO1", key='mp4')],
+    [sg.Button('Converter'), sg.Button('Cancelar')]
+]
+
+window = sg.Window('Youtube Conversor MP3/MP4', layout)
+
 while True:
-    url = str(input('URL Vídeo do Youtube: '))
+    event, values = window.read()
 
-    print('-' * 20 + 'MENU' + '-' * 20)
-    print('[1] - Download MP4\n[2] - Download MP3')
-
-    video = YouTube(url)
-
-    type_download = 0
-
-    while type_download <= 0 or type_download >= 3:
-        type_download = int(input('Escolha uma das Opções: '))
-
-    if type_download == 1:
-        print('CARREGANDO...')
-        stream = video.streams.get_highest_resolution()
-
-        stream.download(output_path=desktop)
-        print('Download Concluido com Sucesso!')
-
-    if type_download == 2:
-        print('CARREGANDO...')
-        stream = video.streams.get_audio_only()
-        video_name = video.title + '.mp3'
-        stream.download(output_path=desktop, filename=video_name)
-        print('Download Concluido com Sucesso!')
-
-    option = ' '
-
-    while option not in 'SN':
-        option = str(input('Quer Continuar? [S/N]: ')).upper()
-
-    if option in 'N':
+    if event == sg.WINDOW_CLOSED or event == 'Cancelar':
         break
+    
+    elif event == 'Converter' and 'youtube' not in values['url']:
+        sg.popup_ok('URL INVÁLIDA!')
+
+    elif event == 'Converter' and 'youtube' in values['url']:
+        video = YouTube(values['url'])
+
+        if values['mp4'] == True:
+            stream = video.streams.get_highest_resolution()
+            stream.download(output_path=desktop)
+            sg.popup_ok('Download Concluído com Sucesso!')
+
+        elif values['mp3'] == True:
+            stream = video.streams.get_audio_only()
+            video_name = video.title + '.mp3'
+            stream.download(output_path=desktop, filename=video_name)
+            sg.popup_ok('Download Concluído com Sucesso!')
