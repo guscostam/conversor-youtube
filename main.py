@@ -1,8 +1,9 @@
 from pytube import YouTube
 from PySimpleGUI import PySimpleGUI as sg
-from os import path
+import os
+import re
 
-desktop = path.expanduser('~/Desktop')
+desktop = os.path.expanduser('~/Desktop')
 
 sg.theme('LightGrey1')
 
@@ -14,25 +15,35 @@ layout = [
 
 window = sg.Window('Youtube Conversor MP3/MP4', layout)
 
+def remove_special_characters(string):
+    return re.sub(r'[^a-zA-Z0-9\s]', '', string)
+
+def is_youtube_url(url):
+    youtube_regex = re.compile(r'^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+')
+    return youtube_regex.match(url) is not None
+
 while True:
     event, values = window.read()
+
+    url_validation = is_youtube_url(values['url'])
 
     if event == sg.WINDOW_CLOSED or event == 'Cancelar':
         break
     
-    elif event == 'Converter' and 'youtube' not in values['url']:
+    elif event == 'Converter' and url_validation == False:
         sg.popup_ok('URL INVÁLIDA!')
 
-    elif event == 'Converter' and 'youtube' in values['url']:
+    elif event == 'Converter' and url_validation:
         video = YouTube(values['url'])
+        stream = video.streams.get_highest_resolution()
 
         if values['mp4'] == True:
-            stream = video.streams.get_highest_resolution()
-            stream.download(output_path=desktop)
+            stream.download()
             sg.popup_ok('Download Concluído com Sucesso!')
 
         elif values['mp3'] == True:
-            stream = video.streams.get_audio_only()
-            video_name = video.title + '.mp3'
-            stream.download(output_path=desktop, filename=video_name)
+            stream.download(filename='video.mp4')
+            os.system(f'ffmpeg -i video.mp4 output.mp3')
+            os.rename('output.mp3', f'{remove_special_characters(video.title)}.mp3')
+            os.remove('video.mp4')
             sg.popup_ok('Download Concluído com Sucesso!')
